@@ -29,17 +29,43 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 与Mapper配置文件中的每个select/update/insert/delete节点相对应，
+ * 另外，比较特殊的事，selectKey解析后，也会对应一个 MappedStatement 对象
  * @author Clinton Begin
  */
 public final class MappedStatement {
 
+  /**
+   * 资源引用地址
+   */
   private String resource;
+  /**
+   * Configuration对象
+   */
   private Configuration configuration;
+  /**
+   * id编号
+   */
   private String id;
+  /**
+   * 尝试影响驱动程序每次批量返回的结果行数和这个设置值相等。默认值为unset（依赖驱动）
+   */
   private Integer fetchSize;
+  /**
+   * 这个设置是在抛出异常前，驱动程序等待数据库返回请求结果的秒数。默认值为unset（依赖驱动）
+   */
   private Integer timeout;
+  /**
+   * 语句类型
+   */
   private StatementType statementType;
+  /**
+   * 结果集类型
+   */
   private ResultSetType resultSetType;
+  /**
+   * SqlSource对象
+   */
   private SqlSource sqlSource;
   private Cache cache;
   private ParameterMap parameterMap;
