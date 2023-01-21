@@ -53,13 +53,19 @@ public class SimpleExecutor extends BaseExecutor {
     }
   }
 
+  /**
+   * SimpleExecutor实现BaseExecutor的doQuery方法
+   */
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
       Configuration configuration = ms.getConfiguration();
+      // 传⼊参数创建StatementHandler对象来执⾏查询
       StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+      // 创建jdbc中的Statement对象
       stmt = prepareStatement(handler, ms.getStatementLog());
+      // StatementHandler 进⾏处理
       return handler.query(stmt, resultHandler);
     } finally {
       closeStatement(stmt);
@@ -81,8 +87,12 @@ public class SimpleExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
+  /**
+   * 创建Statement的⽅法
+   */
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
+    // getConnection⽅法经过重重调⽤最后会调⽤openConnection⽅法，从连接池中获得连接
     Connection connection = getConnection(statementLog);
     stmt = handler.prepare(connection, transaction.getTimeout());
     handler.parameterize(stmt);

@@ -138,10 +138,14 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  /**
+   * 连接池获得连接的⽅法(JdbcTransaction.openConnection)
+   */
   protected void openConnection() throws SQLException {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
+    // 从连接池获得连接
     connection = dataSource.getConnection();
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());

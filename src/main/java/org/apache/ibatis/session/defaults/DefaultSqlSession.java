@@ -130,6 +130,10 @@ public class DefaultSqlSession implements SqlSession {
     }
   }
 
+  /**
+   * 8.进⼊selectList⽅法，多个重载⽅法。
+   * @param statement Unique identifier matching the statement to use.
+   */
   @Override
   public <E> List<E> selectList(String statement) {
     return this.selectList(statement, null);
@@ -145,9 +149,17 @@ public class DefaultSqlSession implements SqlSession {
     return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
   }
 
+  /**
+   * @param statement 全限定名 + ⽅法名, 用于取出MappedStatement
+   * @param parameter 参数
+   * @param rowBounds ⽤以逻辑分⻚⻚
+   * @param handler 结果处理，默认null
+   */
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
     try {
+      // 根据传⼊的全限定名 + ⽅法名从映射的Map中取出MappedStatement对象
       MappedStatement ms = configuration.getMappedStatement(statement);
+      // 调⽤Executor中的query⽅法处理 ，rowBounds是⽤来逻辑分⻚，wrapCollection(parameter)是⽤来装饰集合或者数组参数
       return executor.query(ms, wrapCollection(parameter), rowBounds, handler);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
