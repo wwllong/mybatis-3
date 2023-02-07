@@ -95,6 +95,7 @@ public class SimpleExecutor extends BaseExecutor {
     // getConnection⽅法经过重重调⽤最后会调⽤openConnection⽅法，从连接池中获得连接
     Connection connection = getConnection(statementLog);
     stmt = handler.prepare(connection, transaction.getTimeout());
+    // 参数化，对占位符进行设值
     handler.parameterize(stmt);
     return stmt;
   }
