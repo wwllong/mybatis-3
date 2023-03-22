@@ -121,6 +121,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
   }
 
+  /**
+   * 构建Cache对象
+   */
   public Cache useNewCache(Class<? extends Cache> typeClass,
       Class<? extends Cache> evictionClass,
       Long flushInterval,
@@ -128,7 +131,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
       boolean readWrite,
       boolean blocking,
       Properties props) {
+    // ⽣成Cache对象
     Cache cache = new CacheBuilder(currentNamespace)
+        // 这⾥如果我们定义了<cache/>中的type,就使⽤⾃定义的Cache,否则使⽤和⼀级缓存相同的PerpetualCache
         .implementation(valueOrDefault(typeClass, PerpetualCache.class))
         .addDecorator(valueOrDefault(evictionClass, LruCache.class))
         .clearInterval(flushInterval)
@@ -137,7 +142,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .blocking(blocking)
         .properties(props)
         .build();
+    // 添加到Configuration中
     configuration.addCache(cache);
+    // 将cache赋值给MapperBuilderAssistant.currentCache
     currentCache = cache;
     return cache;
   }
@@ -269,7 +276,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
     id = applyCurrentNamespace(id, false);
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
-
+    // 创建MappedStatement对象
     MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
         .resource(resource)
         .fetchSize(fetchSize)
@@ -286,6 +293,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         .resultSetType(resultSetType)
         .flushCacheRequired(valueOrDefault(flushCache, !isSelect))
         .useCache(valueOrDefault(useCache, isSelect))
+        // 在这⾥将之前⽣成的Cache封装到MappedStatement
         .cache(currentCache);
 
     ParameterMap statementParameterMap = getStatementParameterMap(parameterMap, parameterType, id);
