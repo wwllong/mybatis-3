@@ -22,21 +22,26 @@ import org.apache.ibatis.cache.decorators.TransactionalCache;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * 事务缓存管理器
  * @author Clinton Begin
  */
 public class TransactionalCacheManager {
 
+  // Cache 与 TransactionalCache 的映射关系表
   private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {
+    // 获取TransactionalCache对象，并调⽤该对象的clear⽅法，下同
     getTransactionalCache(cache).clear();
   }
 
   public Object getObject(Cache cache, CacheKey key) {
+    // 直接从TransactionalCache中获取缓存
     return getTransactionalCache(cache).getObject(key);
   }
 
   public void putObject(Cache cache, CacheKey key, Object value) {
+    // 直接存⼊TransactionalCache的缓存中
     getTransactionalCache(cache).putObject(key, value);
   }
 
@@ -53,6 +58,8 @@ public class TransactionalCacheManager {
   }
 
   private TransactionalCache getTransactionalCache(Cache cache) {
+    // 从映射表中获取 TransactionalCache, 如果没有则创建⼀个新的TransactionalCache放进caches中
+    // TransactionalCache 也是⼀种装饰类，为 Cache 增加事务功能
     return MapUtil.computeIfAbsent(transactionalCaches, cache, TransactionalCache::new);
   }
 

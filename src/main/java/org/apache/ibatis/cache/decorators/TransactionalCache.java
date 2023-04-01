@@ -39,9 +39,12 @@ public class TransactionalCache implements Cache {
 
   private static final Log log = LogFactory.getLog(TransactionalCache.class);
 
+  // 真正的缓存对象，和上⾯的Map<Cache, TransactionalCache> 中的Cache是同⼀个
   private final Cache delegate;
   private boolean clearOnCommit;
+  // 在事务被提交前，所有从数据库中查询的结果将缓存在此集合中
   private final Map<Object, Object> entriesToAddOnCommit;
+  // 在事务被提交前，当缓存未命中时，CacheKey 将会被存储在此集合中
   private final Set<Object> entriesMissedInCache;
 
   public TransactionalCache(Cache delegate) {
@@ -64,8 +67,10 @@ public class TransactionalCache implements Cache {
   @Override
   public Object getObject(Object key) {
     // issue #116
+    // 查询的时候是直接从delegate中去查询的，也就是从真正的缓存对象中查询
     Object object = delegate.getObject(key);
     if (object == null) {
+      // 缓存未命中，则将 key 存⼊到 entriesMissedInCache 中
       entriesMissedInCache.add(key);
     }
     // issue #146
@@ -78,6 +83,7 @@ public class TransactionalCache implements Cache {
 
   @Override
   public void putObject(Object key, Object object) {
+    // 将键值对存⼊到 entriesToAddOnCommit 这个Map中中，⽽⾮真实的缓存对象delegate 中
     entriesToAddOnCommit.put(key, object);
   }
 
@@ -88,15 +94,19 @@ public class TransactionalCache implements Cache {
 
   @Override
   public void clear() {
+    // 清空 entriesToAddOnCommit，但不清空 delegate 缓存
     clearOnCommit = true;
     entriesToAddOnCommit.clear();
   }
 
   public void commit() {
+    // 根据 clearOnCommit 的值决定是否清空 delegate
     if (clearOnCommit) {
       delegate.clear();
     }
+    // 刷新未缓存的结果到 delegate 缓存中
     flushPendingEntries();
+    // 重置 entriesToAddOnCommit 和 entriesMissedInCache
     reset();
   }
 
@@ -107,16 +117,19 @@ public class TransactionalCache implements Cache {
 
   private void reset() {
     clearOnCommit = false;
+    // 清空集合
     entriesToAddOnCommit.clear();
     entriesMissedInCache.clear();
   }
 
   private void flushPendingEntries() {
     for (Map.Entry<Object, Object> entry : entriesToAddOnCommit.entrySet()) {
+      // 将 entriesToAddOnCommit 中的内容转存到 delegate 中
       delegate.putObject(entry.getKey(), entry.getValue());
     }
     for (Object entry : entriesMissedInCache) {
       if (!entriesToAddOnCommit.containsKey(entry)) {
+        // 存⼊空值
         delegate.putObject(entry, null);
       }
     }
@@ -125,6 +138,7 @@ public class TransactionalCache implements Cache {
   private void unlockMissedEntries() {
     for (Object entry : entriesMissedInCache) {
       try {
+        // 调⽤ removeObject 进⾏解锁
         delegate.removeObject(entry);
       } catch (Exception e) {
         log.warn("Unexpected exception while notifying a rollback to the cache adapter. "
