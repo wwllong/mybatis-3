@@ -127,6 +127,7 @@ public class CachingExecutor implements Executor {
   @Override
   public void commit(boolean required) throws SQLException {
     delegate.commit(required);
+    // 重点这里
     tcm.commit();
   }
 
@@ -172,7 +173,9 @@ public class CachingExecutor implements Executor {
   }
 
   private void flushCacheIfRequired(MappedStatement ms) {
+    // 获取MappedStatement对应的Cache
     Cache cache = ms.getCache();
+    // Cache不为空 并且 设置了flushCache="true"
     if (cache != null && ms.isFlushCacheRequired()) {
       tcm.clear(cache);
     }

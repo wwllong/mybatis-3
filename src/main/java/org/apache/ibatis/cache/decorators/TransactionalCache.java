@@ -125,6 +125,7 @@ public class TransactionalCache implements Cache {
   private void flushPendingEntries() {
     for (Map.Entry<Object, Object> entry : entriesToAddOnCommit.entrySet()) {
       // 将 entriesToAddOnCommit 中的内容转存到 delegate 中
+      // 在这⾥才真正的将entriesToAddOnCommit的对象逐个添加到delegate中，只有这时⼆级缓存才真正的⽣效
       delegate.putObject(entry.getKey(), entry.getValue());
     }
     for (Object entry : entriesMissedInCache) {

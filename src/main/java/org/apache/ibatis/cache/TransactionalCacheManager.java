@@ -47,6 +47,7 @@ public class TransactionalCacheManager {
 
   public void commit() {
     for (TransactionalCache txCache : transactionalCaches.values()) {
+      // 这里执行了TransactionalCache的commit
       txCache.commit();
     }
   }
