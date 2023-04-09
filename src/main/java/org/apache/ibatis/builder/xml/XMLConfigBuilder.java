@@ -66,9 +66,6 @@ public class XMLConfigBuilder extends BaseBuilder {
     this(reader, environment, null);
   }
 
-  /**
-   * 3.XMLConfigBuilder解析mybatis的配置文件
-   */
   public XMLConfigBuilder(Reader reader, String environment, Properties props) {
     this(new XPathParser(reader, true, props, new XMLMapperEntityResolver()), environment, props);
   }
@@ -81,6 +78,9 @@ public class XMLConfigBuilder extends BaseBuilder {
     this(inputStream, environment, null);
   }
 
+  /**
+   * 3.XMLConfigBuilder解析mybatis的配置文件
+   */
   public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
     this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
   }
